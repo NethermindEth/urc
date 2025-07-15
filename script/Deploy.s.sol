@@ -4,22 +4,30 @@ pragma solidity >=0.8.0 <0.9.0;
 import "forge-std/Script.sol";
 import "../src/Registry.sol";
 
+// Nethermind: Modify the script to use the private key and configuration from env file
 contract DeployScript is Script {
-    // forge script script/Deploy.s.sol:DeployScript --sig "deploy()" --rpc-url $RPC_URL --account $FOUNDRY_WALLET --broadcast
-    function deploy() external {
-        // Start broadcasting transactions
-        vm.startBroadcast();
+    modifier broadcast() {
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(privateKey);
+        _;
+        vm.stopBroadcast();
+    }
 
-        // Read config from JSON file
-        string memory configPath = "config/registry.json";
-        string memory configJson = vm.readFile(configPath);
+    function run() external broadcast {
+        // Nethermind: Read the configuration from the env file
+        uint256 minCollateralWei = vm.envUint("MIN_COLLATERAL_WEI");
+        uint256 fraudProofWindow = vm.envUint("FRAUD_PROOF_WINDOW");
+        uint256 unregistrationDelay = vm.envUint("UNREGISTRATION_DELAY");
+        uint256 slashWindow = vm.envUint("SLASH_WINDOW");
+        uint256 optInDelay = vm.envUint("OPT_IN_DELAY");
 
+        // Nethermind: Create the configuration for the Registry contract using the new variables
         IRegistry.Config memory config = IRegistry.Config({
-            minCollateralWei: uint80(vm.parseJsonUint(configJson, ".minCollateralWei")),
-            fraudProofWindow: uint32(vm.parseJsonUint(configJson, ".fraudProofWindow")),
-            unregistrationDelay: uint32(vm.parseJsonUint(configJson, ".unregistrationDelay")),
-            slashWindow: uint32(vm.parseJsonUint(configJson, ".slashWindow")),
-            optInDelay: uint32(vm.parseJsonUint(configJson, ".optInDelay"))
+            minCollateralWei: uint80(minCollateralWei),
+            fraudProofWindow: uint32(fraudProofWindow),
+            unregistrationDelay: uint32(unregistrationDelay),
+            slashWindow: uint32(slashWindow),
+            optInDelay: uint32(optInDelay)
         });
 
         // Deploy the Registry contract
@@ -27,7 +35,5 @@ contract DeployScript is Script {
 
         // Log the deployed address
         console.log("Registry deployed to:", address(registry));
-
-        vm.stopBroadcast();
     }
 }
