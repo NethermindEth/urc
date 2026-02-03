@@ -6,7 +6,8 @@ COPY . .
 
 RUN apt-get update && apt-get install -y jq
 
-RUN git init && \
+RUN rm -f .git && \
+    git init && \
     curl -L https://foundry.paradigm.xyz | bash && \
     . ~/.bashrc && \
     foundryup && \
