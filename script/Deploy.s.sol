@@ -35,5 +35,14 @@ contract DeployScript is Script {
 
         // Log the deployed address
         console.log("Registry deployed to:", address(registry));
+        writeJson("registry", address(registry));
+    }
+
+    /// @dev Writes an address to the deployment JSON file
+    function writeJson(string memory name, address addr) internal {
+        vm.writeJson(
+            vm.serializeAddress("deployment", name, addr),
+            string.concat(vm.projectRoot(), "/config/deploy_urc.json")
+        );
     }
 }
