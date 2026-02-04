@@ -6,9 +6,7 @@ COPY . .
 
 RUN apt-get update && apt-get install -y jq
 
-RUN rm -f .git && \
-    git init && \
-    curl -L https://foundry.paradigm.xyz | bash && \
+RUN curl -L https://foundry.paradigm.xyz | bash && \
     . ~/.bashrc && \
     foundryup && \
     forge install
